@@ -5,7 +5,33 @@
 #include "matrixOperations.h"
 
 int n;
-struct timeval start, stop;
+
+/**
+ * @brief Function that benchmarks the matrix multiplication
+ * 		function and returns the number of operations per ms
+ * 		and elapsed time.
+ * 
+ * @param[in] iter Number of iterations
+ * @param[in] a First matrix
+ * @param[in] b Second matrix
+ * @param[in] n Size of the matrices
+ * @return Pointer to the matrix
+ */
+int benchmarkMultiplication(int iter, int** a, int** b, int n) {
+    clock_t start_time = clock();
+    for (int i = 0; i < iter; i++) {
+        free(matrixMultiplication(a, b, n));
+    }
+    clock_t end_time = clock();
+
+    double elapsed_time = (double)(end_time - start_time) / CLOCKS_PER_SEC;
+    double ops_per_ms = (iter / elapsed_time) / 1000.0;
+
+	printf("Iterations: %d\n", iter);
+    printf("Ops/ms: %.2f\n", ops_per_ms);
+	printf("Elapsed time: %.2f\n", elapsed_time/iter);
+}
+
 
 /**
  * @brief Main function
@@ -22,30 +48,16 @@ int main(int argc, char *argv[]) {
 	if (argc < 2) {return -1;}
 
 	n = atoi(argv[1]);
-	printf("Orden de las matrices: %d\n", n);
 
 	// Matrix Inicialization
 	int** a = randSquareMatrix(n);
 	int** b = randSquareMatrix(n);
 	
 	for (int i=1; i<=n; i=i*2) {
-
-        printf("Tamano de bloque: %d\n", i);
-		gettimeofday(&start, NULL);			// Time measurement opening
-
-        int** c = matrixMultiplication(a, b, i);
-
-		gettimeofday(&stop, NULL);			// Time measurement closing
-		free(c);
-
-		double time = stop.tv_sec - start.tv_sec;
-		time = time + 1e-6*(stop.tv_usec - start.tv_usec);
-
-        printf("Tiempo de ejecucion: %f (seconds)\n\n", time);		
+		printf("Orden de las matrices: %d\n", i);
+		benchmarkMultiplication(100000, a, b, i);
+		printf("\n");
     }
-
-	fprintf(f, "]\n");
-	fclose(f);
 
 	free(a);
 	free(b);
